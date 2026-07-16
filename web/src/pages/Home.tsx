@@ -125,15 +125,9 @@ export default function Home() {
       <div className="flex flex-col gap-3">
         <button
           className="py-4 rounded-full btn-brand-solid font-semibold"
-          onClick={() => navigate("/search?role=teach")}
-        >
-          멘티 고르기 (가르치기)
-        </button>
-        <button
-          className="py-4 rounded-full btn-brand-solid font-semibold"
           onClick={() => navigate("/search?role=learn")}
         >
-          멘토 고르기 (배우기)
+          멘토 고르기
         </button>
       </div>
 

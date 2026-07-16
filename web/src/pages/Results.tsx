@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 
 interface LocationState {
-  role: "teach" | "learn";
+  role: "learn"; // 멘티가 멘토를 고르는 방향만 지원
   criteria: Record<string, any>;
 }
 
@@ -41,9 +41,7 @@ export default function Results() {
         <button className="text-gray-400" onClick={() => navigate(-1)}>
           ← 뒤로
         </button>
-        <h1 className="text-xl font-bold">
-          {state.role === "teach" ? "배우기 준비완료 학생" : "가르치기 준비완료 학생"}
-        </h1>
+        <h1 className="text-xl font-bold">가르치기 준비완료 학생</h1>
       </div>
 
       {loading && <p className="text-gray-400 text-sm">검색 중...</p>}
@@ -53,7 +51,7 @@ export default function Results() {
 
       <div className="flex flex-col gap-3">
         {candidates.map((c) => {
-          const subjectInfo = state.role === "teach" ? c.learnSubject : c.teachSubject;
+          const subjectInfo = c.teachSubject;
           return (
             <div
               key={c.id}
@@ -78,8 +76,7 @@ export default function Results() {
                 </div>
                 {subjectInfo && (
                   <div className="text-sm">
-                    {state.role === "teach" ? "배우고 싶은 과목" : "가르칠 수 있는 과목"}:{" "}
-                    <b>{subjectInfo.subject}</b>
+                    가르칠 수 있는 과목: <b>{subjectInfo.subject}</b>
                   </div>
                 )}
               </div>

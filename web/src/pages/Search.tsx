@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SubjectPicker from "../components/SubjectPicker";
 import { api } from "../lib/api";
 import type { SubjectChoice, SubjectTree } from "../lib/api";
 
+// 멘티가 멘토를 고르는 방향만 지원한다 (멘토가 멘티를 고르는 흐름은 없음).
+const role = "learn" as const;
+
 export default function Search() {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const role = (params.get("role") === "learn" ? "learn" : "teach") as "teach" | "learn";
 
   const [tree, setTree] = useState<SubjectTree | null>(null);
   const [subject, setSubject] = useState<SubjectChoice | null>(null);
@@ -42,9 +43,7 @@ export default function Search() {
 
   return (
     <div className="min-h-screen p-6 flex flex-col gap-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold">
-        {role === "teach" ? "멘티 고르기 — 가르칠 과목 선택" : "멘토 고르기 — 배울 과목 선택"}
-      </h1>
+      <h1 className="text-xl font-bold">멘토 고르기 — 배울 과목 선택</h1>
 
       <SubjectPicker tree={tree} label="과목 (필수)" value={subject} onChange={setSubject} />
 
@@ -52,7 +51,7 @@ export default function Search() {
         <h3 className="font-semibold text-sm text-gray-700">추가 조건 (선택)</h3>
         <input
           className="border rounded px-3 py-2 text-sm"
-          placeholder={role === "teach" ? "멘티의 학교" : "멘토의 학교"}
+          placeholder="멘토의 학교"
           value={school}
           onChange={(e) => setSchool(e.target.value)}
         />
