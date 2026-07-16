@@ -28,6 +28,28 @@ app.get("/api/subjects", (_req, res) => {
   res.type("application/json").send(fs.readFileSync(subjectsPath, "utf-8"));
 });
 
+app.get("/api/geocode", async (req, res) => {
+  const lat = Number(req.query.lat);
+  const lng = Number(req.query.lng);
+  const kakaoKey = process.env.VITE_KAKAO_REST_KEY;
+  if (!kakaoKey) return res.json({ city: null });
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return res.status(400).json({ error: "lat, lng가 필요합니다." });
+  }
+  try {
+    const kakaoRes = await fetch(
+      `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`,
+      { headers: { Authorization: `KakaoAK ${kakaoKey}` } }
+    );
+    if (!kakaoRes.ok) return res.json({ city: null });
+    const data = await kakaoRes.json();
+    const city = data?.documents?.[0]?.region_1depth_name ?? null;
+    res.json({ city });
+  } catch {
+    res.json({ city: null });
+  }
+});
+
 app.get("/api/nickname-check", async (req, res) => {
   const nickname = String(req.query.nickname || "").trim();
   if (!nickname) return res.status(400).json({ error: "닉네임을 입력해주세요." });

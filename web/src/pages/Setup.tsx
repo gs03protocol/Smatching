@@ -20,6 +20,7 @@ export default function Setup() {
 
   const [neis, setNeis] = useState<NeisResult | null>(null);
   const [visible, setVisible] = useState<Record<string, boolean>>({});
+  const [fileName, setFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [slots, setSlots] = useState<TimeSlot[]>([{ day: "월", start: "15:00", end: "17:00" }]);
@@ -50,9 +51,18 @@ export default function Setup() {
     }
   }
 
+  // 위치 확인 단계에 들어오면 버튼을 누르지 않아도 자동으로 GPS 위치를 받아온다.
+  useEffect(() => {
+    if (step === 1 && !city) {
+      handleLocate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setFileName(file.name);
     const html = await file.text();
     try {
       const result = await api.uploadNeis(html);
@@ -124,10 +134,12 @@ export default function Setup() {
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-bold">위치 확인</h2>
             <p className="text-sm text-gray-500">
-              현재 위치를 기반으로 시/도를 확인해요. 자동으로 확인되지 않으면 직접 입력해주세요.
+              {locating
+                ? "현재 위치를 확인하는 중이에요..."
+                : "현재 위치를 기반으로 시/도를 자동으로 채웠어요. 다르면 직접 수정해주세요."}
             </p>
             <button className="py-2 rounded-full btn-brand text-sm font-medium" onClick={handleLocate} disabled={locating}>
-              {locating ? "위치 확인 중..." : "현재 위치로 확인하기"}
+              {locating ? "위치 확인 중..." : "위치 다시 확인하기"}
             </button>
             <input
               className="border rounded px-3 py-2 text-sm"
@@ -152,8 +164,17 @@ export default function Setup() {
               type="file"
               accept=".html,.htm"
               onChange={handleFile}
-              className="text-sm"
+              className="hidden"
             />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="py-3 rounded-full btn-brand text-sm font-semibold border-2 border-dashed"
+              style={{ borderColor: "var(--color-brand-400)" }}
+            >
+              📎 생기부 HTML 파일 첨부하기
+            </button>
+            {fileName && <p className="text-xs text-gray-500 -mt-2">첨부됨: {fileName}</p>}
             {neis && (
               <div className="bg-orange-50 rounded-lg p-3 text-sm flex flex-col gap-2">
                 <div>

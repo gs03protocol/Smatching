@@ -1,21 +1,14 @@
 /**
  * GPS 좌표 → 시(市) 변환.
- * 카카오맵 REST API 키가 아직 설정되지 않아, 키가 있을 때만 카카오 로컬 API(좌표→행정구역)를
- * 호출하고 없으면 null을 반환해 호출부에서 수동 입력 폴백을 보여주도록 한다.
+ * 브라우저에서 카카오 API를 직접 호출하면 CORS 문제로 실패할 수 있어,
+ * 백엔드(/api/geocode)를 통해 서버 사이드로 호출한다.
  */
-const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY as string | undefined;
-
 export async function reverseGeocodeToCity(lat: number, lng: number): Promise<string | null> {
-  if (!KAKAO_REST_KEY) return null;
   try {
-    const res = await fetch(
-      `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`,
-      { headers: { Authorization: `KakaoAK ${KAKAO_REST_KEY}` } }
-    );
+    const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
     if (!res.ok) return null;
     const data = await res.json();
-    const region = data?.documents?.[0]?.region_1depth_name as string | undefined;
-    return region ?? null;
+    return data?.city ?? null;
   } catch {
     return null;
   }
