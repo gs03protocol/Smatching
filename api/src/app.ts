@@ -173,7 +173,14 @@ app.post("/api/candidates", requireDeviceId, async (req, res) => {
       ...(criteria.city ? { city: criteria.city } : {}),
     },
   });
-  const scored = await scoreCandidates(role, criteria, candidates);
+
+  // 영어 매칭은 멘토의 영어 등급이 멘티보다 같거나 좋아야 하므로, 요청자 본인의 영어 등급을 함께 전달한다.
+  const deviceId = (req as any).deviceId as string;
+  const requester = await prisma.user.findUnique({ where: { id: deviceId } });
+  const requesterEnglishGrade =
+    (requester?.subjectGrades as any)?.["영어"]?.avg ?? null;
+
+  const scored = await scoreCandidates(role, { ...criteria, requesterEnglishGrade }, candidates);
   res.json(scored);
 });
 
