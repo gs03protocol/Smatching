@@ -55,10 +55,17 @@ function cellValue($: cheerio.CheerioAPI, td: any): string {
   return $td.text().trim();
 }
 
-/** 교과학습발달상황 표(석차등급 컬럼이 있는 표)에서 과목별 석차등급을 추출한다. */
-function extractSubjectGrades(html: string): NeisParseResult["subjects"] {
+/**
+ * 교과학습발달상황 표(석차등급 컬럼이 있는 표)에서 과목별 석차등급을 추출하고,
+ * 그런 표(학년마다 공통과목/일반선택 표가 하나씩 나옴)가 몇 번 등장하는지로 현재 학년을 추정한다.
+ * (학적사항 텍스트만으로 학년을 판단하면 학교마다 표기 형식이 달라 1학년으로 오탐하는 경우가 있어,
+ * "학기" 셀 값 대신 실제로 석차등급표가 몇 개 존재하는지—즉 몇 학년치 성적이 기록되어 있는지—를
+ * 근거로 삼는 편이 더 신뢰할 수 있다.)
+ */
+function extractSubjectGrades(html: string): { subjects: NeisParseResult["subjects"]; gradeFromTableCount: number | null } {
   const $ = cheerio.load(html);
   const sums: Record<string, { sum: number; count: number }> = {};
+  let gradedTableCount = 0;
 
   let active = false;
   let trackIdx = -1;
@@ -76,6 +83,7 @@ function extractSubjectGrades(html: string): NeisParseResult["subjects"] {
         active = true;
         trackIdx = values.indexOf("교과");
         gradeIdx = values.indexOf("석차등급");
+        gradedTableCount++;
       } else {
         active = false;
         trackIdx = -1;
@@ -104,11 +112,15 @@ function extractSubjectGrades(html: string): NeisParseResult["subjects"] {
       count,
     };
   }
-  return result;
+
+  const gradeFromTableCount = gradedTableCount > 0 ? Math.min(3, gradedTableCount) : null;
+  return { subjects: result, gradeFromTableCount };
 }
 
 export function parseNeisHtml(html: string): NeisParseResult {
-  const { school, grade } = extractSchoolGrade(html);
-  const subjects = extractSubjectGrades(html);
+  const { school, grade: gradeFromStatus } = extractSchoolGrade(html);
+  const { subjects, gradeFromTableCount } = extractSubjectGrades(html);
+  // 석차등급표 개수(=몇 학년치 성적이 있는지) 기반 추정을 우선하고, 없을 때만 학적사항 텍스트로 보완한다.
+  const grade = gradeFromTableCount ?? gradeFromStatus;
   return { school, grade, subjects };
 }
