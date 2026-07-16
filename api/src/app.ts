@@ -32,7 +32,7 @@ app.get("/api/geocode", async (req, res) => {
   const lat = Number(req.query.lat);
   const lng = Number(req.query.lng);
   const kakaoKey = process.env.VITE_KAKAO_REST_KEY;
-  if (!kakaoKey) return res.json({ city: null });
+  if (!kakaoKey) return res.json({ city: null, debug: "no_key" });
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return res.status(400).json({ error: "lat, lng가 필요합니다." });
   }
@@ -41,12 +41,15 @@ app.get("/api/geocode", async (req, res) => {
       `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`,
       { headers: { Authorization: `KakaoAK ${kakaoKey}` } }
     );
-    if (!kakaoRes.ok) return res.json({ city: null });
+    if (!kakaoRes.ok) {
+      const text = await kakaoRes.text();
+      return res.json({ city: null, debug: `kakao_${kakaoRes.status}`, detail: text });
+    }
     const data = await kakaoRes.json();
     const city = data?.documents?.[0]?.region_1depth_name ?? null;
-    res.json({ city });
-  } catch {
-    res.json({ city: null });
+    res.json({ city, debug: "ok" });
+  } catch (e: any) {
+    res.json({ city: null, debug: "exception", detail: e?.message });
   }
 });
 
