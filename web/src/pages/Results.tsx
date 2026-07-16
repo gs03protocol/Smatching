@@ -60,7 +60,17 @@ export default function Results() {
               className="flex items-center bg-white rounded-xl shadow px-4 py-3 gap-4"
             >
               <div className="flex-1 flex flex-col gap-1">
-                <div className="font-bold">{c.nickname}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">{c.nickname}</span>
+                  {typeof c._score === "number" && (
+                    <span
+                      className="text-xs font-semibold rounded-full px-2 py-0.5"
+                      style={{ background: "var(--color-brand-100)", color: "var(--color-brand-700)" }}
+                    >
+                      적합도 {c._score}
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-gray-500">
                   {[c.city, c.schoolName, c.gradeLevel ? `고${c.gradeLevel}` : null]
                     .filter(Boolean)

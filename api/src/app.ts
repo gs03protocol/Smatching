@@ -175,12 +175,22 @@ app.post("/api/candidates", requireDeviceId, async (req, res) => {
   });
 
   // 어떤 과목이든 멘토의 (매칭된 과목) 등급이 멘티보다 같거나 좋아야 하므로, 요청자 본인의 해당 과목 등급을 함께 전달한다.
+  // 또한 명시적으로 학교/지역 필터를 입력하지 않아도, 본인과 같은 학교·지역이면 자동으로 가산점이 붙도록
+  // 요청자 본인의 학교/지역도 함께 전달한다.
   const deviceId = (req as any).deviceId as string;
   const requester = await prisma.user.findUnique({ where: { id: deviceId } });
-  const requesterTrackGrade =
-    (requester?.subjectGrades as any)?.[criteria.track]?.avg ?? null;
+  const requesterTrackGrade = (requester?.subjectGrades as any)?.[criteria.track]?.avg ?? null;
 
-  const scored = await scoreCandidates(role, { ...criteria, requesterTrackGrade }, candidates);
+  const scored = await scoreCandidates(
+    role,
+    {
+      ...criteria,
+      requesterTrackGrade,
+      requesterSchool: requester?.schoolName ?? null,
+      requesterCity: requester?.city ?? null,
+    },
+    candidates
+  );
   res.json(scored);
 });
 

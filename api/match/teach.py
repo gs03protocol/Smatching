@@ -50,9 +50,17 @@ def score_candidates(criteria, candidates):
         score = 100
 
         if school and candidate.get("schoolName") == school:
-            score += 20
+            score += 20  # 검색 시 명시적으로 입력한 학교 조건과 일치
         if city and candidate.get("city") == city:
-            score += 10
+            score += 10  # 검색 시 명시적으로 입력한 지역 조건과 일치
+
+        requester_school = criteria.get("requesterSchool")
+        requester_city = criteria.get("requesterCity")
+        if requester_school and candidate.get("schoolName") == requester_school:
+            score += 20  # 필터를 안 넣어도, 나와 같은 학교면 자동으로 가산점
+        if requester_city and candidate.get("city") == requester_city:
+            score += 10  # 나와 같은 지역이면 자동으로 가산점
+
         if time_slots:
             cand_slots = candidate.get("availableTimes") or []
             if any(_time_ranges_overlap(a, b) for a in time_slots for b in cand_slots):
