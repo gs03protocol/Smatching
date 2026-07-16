@@ -35,18 +35,17 @@ def score_candidates(criteria, candidates):
         if target.get("subject") != subject or target.get("track") != track or target.get("grade") != grade:
             continue
 
-        if track == "영어":
-            # 영어는 멘토의 등급이 멘티보다 같거나 좋아야만(숫자가 작거나 같아야만) 매칭한다.
-            requester_grade = criteria.get("requesterEnglishGrade")
-            candidate_grade = ((candidate.get("subjectGrades") or {}).get("영어") or {}).get("avg")
-            if requester_grade is None or candidate_grade is None:
-                continue  # 둘 중 한쪽이라도 영어 등급 정보가 없으면 실력 비교가 불가능해 제외
-            if subject_field == "learnSubject":  # 요청자가 멘토(가르치기)
-                mentor_grade, mentee_grade = requester_grade, candidate_grade
-            else:  # subject_field == "teachSubject", 요청자가 멘티(배우기)
-                mentor_grade, mentee_grade = candidate_grade, requester_grade
-            if mentor_grade > mentee_grade:
-                continue  # 등급 숫자가 클수록 성적이 낮으므로, 멘토가 멘티보다 못하면 제외
+        # 매칭된 과목(track) 기준으로, 멘토의 등급이 멘티보다 같거나 좋아야만(숫자가 작거나 같아야만) 매칭한다.
+        requester_grade = criteria.get("requesterTrackGrade")
+        candidate_grade = ((candidate.get("subjectGrades") or {}).get(track) or {}).get("avg")
+        if requester_grade is None or candidate_grade is None:
+            continue  # 둘 중 한쪽이라도 해당 과목 등급 정보가 없으면 실력 비교가 불가능해 제외
+        if subject_field == "learnSubject":  # 요청자가 멘토(가르치기)
+            mentor_grade, mentee_grade = requester_grade, candidate_grade
+        else:  # subject_field == "teachSubject", 요청자가 멘티(배우기)
+            mentor_grade, mentee_grade = candidate_grade, requester_grade
+        if mentor_grade > mentee_grade:
+            continue  # 등급 숫자가 클수록 성적이 낮으므로, 멘토가 멘티보다 못하면 제외
 
         score = 100
 
