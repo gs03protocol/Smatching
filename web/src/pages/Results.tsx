@@ -79,6 +79,14 @@ export default function Results() {
                     가르칠 수 있는 과목: <b>{subjectInfo.subject}</b>
                   </div>
                 )}
+                {Array.isArray(c.availableTimes) && c.availableTimes.length > 0 && (
+                  <div className="text-xs text-gray-500">
+                    가능 시간:{" "}
+                    {c.availableTimes
+                      .map((t: { day: string; start: string; end: string }) => `${t.day} ${t.start}~${t.end}`)
+                      .join(", ")}
+                  </div>
+                )}
               </div>
               <button
                 className="px-4 py-2 rounded-full btn-brand-solid text-sm font-semibold whitespace-nowrap disabled:opacity-40"

@@ -6,6 +6,7 @@ import type { SubjectChoice, SubjectTree } from "../lib/api";
 
 // 멘티가 멘토를 고르는 방향만 지원한다 (멘토가 멘티를 고르는 흐름은 없음).
 const role = "learn" as const;
+const DAYS = ["월", "화", "수", "목", "금", "토", "일"];
 
 export default function Search() {
   const navigate = useNavigate();
@@ -14,6 +15,10 @@ export default function Search() {
   const [subject, setSubject] = useState<SubjectChoice | null>(null);
   const [school, setSchool] = useState("");
   const [city, setCity] = useState("");
+  const [useTimeFilter, setUseTimeFilter] = useState(false);
+  const [day, setDay] = useState("월");
+  const [start, setStart] = useState("15:00");
+  const [end, setEnd] = useState("17:00");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -34,6 +39,7 @@ export default function Search() {
           subject: subject.subject,
           school: school || undefined,
           city: city || undefined,
+          timeSlots: useTimeFilter ? [{ day, start, end }] : undefined,
         },
       },
     });
@@ -61,6 +67,35 @@ export default function Search() {
           value={city}
           onChange={(e) => setCity(e.target.value)}
         />
+
+        <label className="flex items-center gap-2 text-sm mt-1 cursor-pointer">
+          <input type="checkbox" checked={useTimeFilter} onChange={(e) => setUseTimeFilter(e.target.checked)} />
+          멘토링 가능 시간대 조건 추가
+        </label>
+        {useTimeFilter && (
+          <div className="flex items-center gap-2 bg-orange-50 rounded-lg p-2">
+            <select className="border rounded px-2 py-1 text-sm" value={day} onChange={(e) => setDay(e.target.value)}>
+              {DAYS.map((d) => (
+                <option key={d} value={d}>
+                  {d}요일
+                </option>
+              ))}
+            </select>
+            <input
+              type="time"
+              className="border rounded px-2 py-1 text-sm"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+            />
+            <span className="text-gray-400">~</span>
+            <input
+              type="time"
+              className="border rounded px-2 py-1 text-sm"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+            />
+          </div>
+        )}
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
