@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build:web",
+  "outputDirectory": "web/dist",
+  "installCommand": "npm install && npx prisma generate",
+  "rewrites": [
+    { "source": "/api/match/:path*", "destination": "/api/match/:path*" },
+    { "source": "/api/:path*", "destination": "/api" }
+  ]
+}

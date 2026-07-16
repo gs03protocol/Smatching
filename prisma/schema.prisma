@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id             String   @id // device-id (uuid, from browser localStorage)
+  nickname       String   @unique
+  city           String?
+  schoolName     String?
+  gradeLevel     Int?
+  subjectGrades  Json? // { "국어": { "avg": 3.0, "count": 2, "visible": true }, ... }
+  teachSubject   Json? // { "grade": 1, "track": "국어", "subject": "공통국어1" } | null
+  learnSubject   Json?
+  availableTimes Json? // [{ "day": "월", "period": "오후", "start": "15:00", "end": "17:00" }]
+  teachReady     Boolean  @default(false)
+  learnReady     Boolean  @default(false)
+  consents       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([city])
+  @@index([schoolName])
+}
+
+model MatchRequest {
+  id         Int      @id @default(autoincrement())
+  fromUserId String
+  toUserId   String
+  fromNick   String
+  role       String // "teach" (요청자가 멘토) | "learn" (요청자가 멘티)
+  createdAt  DateTime @default(now())
+
+  @@index([toUserId])
+}

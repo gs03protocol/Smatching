@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.local
+web/.env
+*.log
+.vercel/
+
+# 실제 학생 개인정보(생기부 샘플)가 담긴 파일 - 저장소에 올리지 않음
+Example.html
+Example_files/
