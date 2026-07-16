@@ -43,7 +43,12 @@ app.get("/api/geocode", async (req, res) => {
     );
     if (!kakaoRes.ok) return res.json({ city: null });
     const data = await kakaoRes.json();
-    const city = data?.documents?.[0]?.region_1depth_name ?? null;
+    const doc = data?.documents?.[0];
+    const depth1 = doc?.region_1depth_name as string | undefined;
+    const depth2 = doc?.region_2depth_name as string | undefined;
+    // 서울/부산 등 특별시·광역시는 1depth가 이미 "시" 단위, 그 외 도(道)는 2depth(시/군)가 "시" 단위.
+    const isMetro = !!depth1 && /(특별시|광역시|특별자치시)$/.test(depth1);
+    const city = (isMetro ? depth1 : depth2) || depth1 || null;
     res.json({ city });
   } catch {
     res.json({ city: null });
